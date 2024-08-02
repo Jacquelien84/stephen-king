@@ -1,11 +1,11 @@
 package nl.oudhoff.stephenking.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,4 +26,7 @@ public class Book {
     private String movieAdaptation;
     @Column(length = 5000, nullable = false)
     private String description;
+
+    @ManyToMany
+    private Set<Review> reviews = new HashSet<>();
 }

@@ -27,12 +27,15 @@ public class BookService {
         return BookMapper.fromModelToOutputDto(model);
     }
 
-    // Er lijkt niets te gebeuren. Hier naar kijken
     public BookOutputDto updateBook(long id, BookInputDto bookInputDto) {
-        Book book = bookRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
-        Book updatedBook = bookRepo.save(book);
-
-        return BookMapper.fromModelToOutputDto(updatedBook);
+        Optional<Book> book = bookRepo.findById(id);
+        if (book.isPresent()) {
+            Book model = BookMapper.fromInputDtoToModel(bookInputDto);
+            bookRepo.save(model);
+            return BookMapper.fromModelToOutputDto(model);
+        } else {
+            throw new ResourceNotFoundException("Boek met id " + id + " niet gevonden");
+        }
     }
 
     public BookOutputDto getBookById(long id) {
@@ -48,13 +51,13 @@ public class BookService {
     }
 
     public List<BookOutputDto> getAllBooks() {
-        List<Book> allBooks = bookRepo.findAll();
-        List<BookOutputDto> allBooksOutputDtoList = new ArrayList<>();
+        List<Book> books = bookRepo.findAll();
+        List<BookOutputDto> booksOutputDtoList = new ArrayList<>();
 
-        for (Book book : allBooks) {
-            allBooksOutputDtoList.add(BookMapper.fromModelToOutputDto(book));
+        for (Book book : books) {
+            booksOutputDtoList.add(BookMapper.fromModelToOutputDto(book));
         }
-        return allBooksOutputDtoList;
+        return booksOutputDtoList;
     }
 
     public void deleteBookById(long id) {
