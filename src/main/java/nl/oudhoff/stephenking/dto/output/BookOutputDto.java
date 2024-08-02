@@ -1,14 +1,16 @@
-package nl.oudhoff.stephenking.dto;
+package nl.oudhoff.stephenking.dto.output;
 
-import jakarta.persistence.Column;
+import lombok.Getter;
+import lombok.Setter;
 
-public class BookDto {
+@Getter
+@Setter
+public class BookOutputDto {
     public Long id;
     public String title;
     public String author;
     public String originalTitle;
     public Long released;
     public String movieAdaptation;
-    @Column(length = 5000)
     public String description;
 }
