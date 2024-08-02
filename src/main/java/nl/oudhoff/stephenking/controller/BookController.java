@@ -1,11 +1,11 @@
 package nl.oudhoff.stephenking.controller;
 
+
 import jakarta.validation.Valid;
 import nl.oudhoff.stephenking.dto.input.BookInputDto;
 import nl.oudhoff.stephenking.dto.output.BookOutputDto;
 import nl.oudhoff.stephenking.exception.ResourceNotFoundException;
 import nl.oudhoff.stephenking.service.BookService;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,6 +26,7 @@ public class BookController {
         this.bookService = bookService;
     }
 
+    // Kijken of ik een mapper kan maken voor het try stuk
     @PostMapping
     public ResponseEntity<?> createBooks(@Valid @RequestBody BookInputDto bookInputDto, BindingResult br) {
         try {
@@ -45,8 +46,7 @@ public class BookController {
         BookOutputDto bookOutputDto = bookService.createBook(bookInputDto);
         URI uri = URI.create(ServletUriComponentsBuilder
                 .fromCurrentRequest()
-                .path("/" + bookOutputDto.id).toUriString());
-
+                .path("/" + bookOutputDto.getId()).toUriString());
         return ResponseEntity.created(uri).body(bookOutputDto);
     }
 
