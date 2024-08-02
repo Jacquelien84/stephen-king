@@ -14,11 +14,16 @@ import lombok.Setter;
 public class Book {
     @Id
     private Long id;
+    @Column(nullable = false)
     private String title;
+    @Column(nullable = false)
     private String author;
+    @Column(nullable = false)
     private String originalTitle;
+    @Column(nullable = false)
     private Long released;
+    @Column(nullable = false)
     private String movieAdaptation;
-    @Column(length = 5000)
+    @Column(length = 5000, nullable = false)
     private String description;
 }

@@ -1,6 +1,8 @@
 package nl.oudhoff.stephenking.service;
 
-import nl.oudhoff.stephenking.dto.BookDto;
+import nl.oudhoff.stephenking.dto.input.BookInputDto;
+import nl.oudhoff.stephenking.dto.mapper.BookMapper;
+import nl.oudhoff.stephenking.dto.output.BookOutputDto;
 import nl.oudhoff.stephenking.exception.ResourceNotFoundException;
 import nl.oudhoff.stephenking.model.Book;
 import nl.oudhoff.stephenking.repository.BookRepository;
@@ -8,60 +10,59 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
 
-    private final BookRepository bookRepos;
+    private final BookRepository bookRepo;
 
-    public BookService(BookRepository bookRepos) {
-        this.bookRepos = bookRepos;
+    public BookService(BookRepository bookRepo) {
+        this.bookRepo = bookRepo;
     }
 
-    public BookDto createBook(BookDto bookDto) {
-        Book book = new Book();
-        book.setId(bookDto.id);
-        book.setTitle(bookDto.title);
-        book.setAuthor(bookDto.author);
-        book.setOriginalTitle(bookDto.originalTitle);
-        book.setReleased(bookDto.released);
-        book.setMovieAdaptation(bookDto.movieAdaptation);
-        book.setDescription(bookDto.description);
-
-        this.bookRepos.save(book);
-        return bookDto;
+    public BookOutputDto createBook(BookInputDto bookInputDto) {
+        Book model = BookMapper.fromInputDtoToModel(bookInputDto);
+        bookRepo.save(model);
+        return BookMapper.fromModelToOutputDto(model);
     }
 
-    public BookDto getBookById(long id) {
-        Book book = this.bookRepos.findById(id).orElseThrow(() -> new ResourceNotFoundException("Book not found"));
-        BookDto bookDto = new BookDto();
-        bookDto.id = book.getId();
-        bookDto.title = book.getTitle();
-        bookDto.author = book.getAuthor();
-        bookDto.originalTitle = book.getOriginalTitle();
-        bookDto.released = book.getReleased();
-        bookDto.movieAdaptation = book.getMovieAdaptation();
-        bookDto.description = book.getDescription();
-        return bookDto;
+    // Er lijkt niets te gebeuren. Hier naar kijken
+    public BookOutputDto updateBook(long id, BookInputDto bookInputDto) {
+        Book book = bookRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
+        Book updatedBook = bookRepo.save(book);
+
+        return BookMapper.fromModelToOutputDto(updatedBook);
     }
 
-    public List<BookDto> getAllBooks() {
-        List<Book> books = this.bookRepos.findAll();
-        List<BookDto> bookDtos = new ArrayList<>();
+    public BookOutputDto getBookById(long id) {
+        Book book = bookRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Boek met id " + id + " niet gevonden"));
+        return BookMapper.fromModelToOutputDto(book);
+    }
 
-        for (Book book : books) {
-            BookDto bookDto = new BookDto();
+    public BookOutputDto getBookByTitle(String title) {
+        Book book = bookRepo.findByTitleIgnoreCase(title).
+                orElseThrow(() -> new ResourceNotFoundException("Boek met titel " + title + " niet gevonden"));
 
-            bookDto.id = book.getId();
-            bookDto.title = book.getTitle();
-            bookDto.author = book.getAuthor();
-            bookDto.originalTitle = book.getOriginalTitle();
-            bookDto.released = book.getReleased();
-            bookDto.movieAdaptation = book.getMovieAdaptation();
-            bookDto.description = book.getDescription();
+        return BookMapper.fromModelToOutputDto(book);
+    }
 
-            bookDtos.add(bookDto);
+    public List<BookOutputDto> getAllBooks() {
+        List<Book> allBooks = bookRepo.findAll();
+        List<BookOutputDto> allBooksOutputDtoList = new ArrayList<>();
+
+        for (Book book : allBooks) {
+            allBooksOutputDtoList.add(BookMapper.fromModelToOutputDto(book));
         }
-        return bookDtos;
+        return allBooksOutputDtoList;
+    }
+
+    public void deleteBookById(long id) {
+        Optional<Book> book = bookRepo.findById(id);
+        if (book.isPresent()) {
+            bookRepo.delete(book.get());
+        } else {
+            throw new ResourceNotFoundException("Boek met id " + id + " niet gevonden");
+        }
     }
 }

@@ -1,10 +1,12 @@
 package nl.oudhoff.stephenking.controller;
 
 import jakarta.validation.Valid;
-import nl.oudhoff.stephenking.dto.BookDto;
-import nl.oudhoff.stephenking.model.Book;
-import nl.oudhoff.stephenking.repository.BookRepository;
+import nl.oudhoff.stephenking.dto.input.BookInputDto;
+import nl.oudhoff.stephenking.dto.output.BookOutputDto;
+import nl.oudhoff.stephenking.exception.ResourceNotFoundException;
 import nl.oudhoff.stephenking.service.BookService;
+import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -18,36 +20,60 @@ import java.util.List;
 @RequestMapping("/books")
 public class BookController {
 
-    private final BookService service;
+    private final BookService bookService;
+
     public BookController(BookService bookService) {
-        this.service = bookService;
+        this.bookService = bookService;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createBooks(@Valid @RequestBody BookInputDto bookInputDto, BindingResult br) {
+        try {
+            if (br.hasFieldErrors()) {
+                StringBuilder sb = new StringBuilder();
+                for (FieldError fe : br.getFieldErrors()) {
+                    sb.append(fe.getField());
+                    sb.append(" : ");
+                    sb.append(fe.getDefaultMessage());
+                    sb.append("\n");
+                }
+                return ResponseEntity.badRequest().body(sb.toString());
+            }
+        } catch (Exception e) {
+            return ResponseEntity.unprocessableEntity().body("Creation failed");
+        }
+        BookOutputDto bookOutputDto = bookService.createBook(bookInputDto);
+        URI uri = URI.create(ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/" + bookOutputDto.id).toUriString());
+
+        return ResponseEntity.created(uri).body(bookOutputDto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<BookOutputDto> updateBook(@PathVariable long id, @RequestBody BookInputDto bookInputDto) {
+        BookOutputDto updatedBook = bookService.updateBook(id, bookInputDto);
+        return ResponseEntity.ok().body(updatedBook);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BookOutputDto> getBookById(@PathVariable Long id) {
+        return ResponseEntity.ok(bookService.getBookById(id));
+    }
+
+    @GetMapping("/title/{title}")
+    public ResponseEntity<BookOutputDto> getBookByTitle(@PathVariable String title) {
+        return ResponseEntity.ok(bookService.getBookByTitle(title));
     }
 
     @GetMapping
-    public ResponseEntity<List<BookDto>> getAllBooks() {
-        return ResponseEntity.ok(service.getAllBooks());
+    public ResponseEntity<List<BookOutputDto>> getAllBooks() {
+        return ResponseEntity.ok(bookService.getAllBooks());
+    }
 
-        @PostMapping
-        public ResponseEntity<?> createBook (@Valid @RequestBody BookDto bookDto, BindingResult br){
-            try {
-                if (br.hasFieldErrors()) {
-                    StringBuilder sb = new StringBuilder();
-                    for (FieldError fe : br.getFieldErrors()) {
-                        sb.append(fe.getField());
-                        sb.append(" : ");
-                        sb.append(fe.getDefaultMessage());
-                        sb.append("\n");
-                    }
-                    return ResponseEntity.badRequest().body(sb.toString());
-                }
-                bookDto = service.createBook(bookDto);
-                URI uri = URI.create(ServletUriComponentsBuilder
-                        .fromCurrentRequest()
-                        .path("/" + bookDto.id).toUriString());
-                return ResponseEntity.created(uri).body(bookDto);
-            } catch (Exception ex) {
-                return ResponseEntity.unprocessableEntity().body("Creation failed");
-            }
-        }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteBookById(@PathVariable Long id) throws ResourceNotFoundException {
+        bookService.deleteBookById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("Boek met id " + id + " is verwijderd!");
     }
-    }
+}
