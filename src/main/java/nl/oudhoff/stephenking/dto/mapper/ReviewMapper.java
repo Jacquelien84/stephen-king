@@ -14,23 +14,24 @@ public class ReviewMapper {
         ReviewMapper.bookRepo = bookRepo;
     }
 
-    public static Review fromInputDtoToModel (ReviewInputDto inputDto) {
-        Review model = new Review();
-        model.setUserId(inputDto.getUserId());
-        model.setName(inputDto.getName());
-        model.setReviewDate(inputDto.getReviewDate());
-        model.setReviewText(inputDto.getReviewText());
-        model.setAmountOfLikes(inputDto.getAmountOfLikes());
-        return model;
+    public static Review fromInputDtoToModel(ReviewInputDto inputDto) {
+        Review r = new Review();
+        r.setName(inputDto.getName());
+        r.setReviewDate(inputDto.getReviewDate());
+        r.setReviewText(inputDto.getReviewText());
+        return r;
     }
 
-    public static ReviewOutputDto fromModelToOutputDto (Review model) {
-        ReviewOutputDto outputDto = new ReviewOutputDto();
-        outputDto.setUserId(model.getUserId());
-        outputDto.setName(model.getName());
-        outputDto.setReviewDate(model.getReviewDate());
-        outputDto.setReviewText(model.getReviewText());
-        outputDto.setAmountOfLikes(model.getAmountOfLikes());
-        return outputDto;
+    public static ReviewOutputDto fromModelToOutputDto(Review review) {
+        ReviewOutputDto reviewOutputDto = new ReviewOutputDto();
+        reviewOutputDto.setId(review.getId());
+        reviewOutputDto.setName(review.getName());
+        reviewOutputDto.setReviewDate(review.getReviewDate());
+        reviewOutputDto.setReviewText(review.getReviewText());
+        if (review.getBook() != null) {
+            reviewOutputDto.setBookId(review.getBook().getId());
+        }
+            return reviewOutputDto;
+        }
     }
-}
+

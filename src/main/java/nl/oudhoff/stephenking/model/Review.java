@@ -1,26 +1,30 @@
 package nl.oudhoff.stephenking.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "reviews")
 public class Review {
-    @Id
-    private long userId;
-    private String name;
-    private LocalDate reviewDate;
-    private String reviewText;
-    private long amountOfLikes;
 
-    @ManyToMany
-    private Set<Book> books = new HashSet<>();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+    @Column(nullable = false)
+    private String name;
+    @Column(nullable = false)
+    private LocalDate reviewDate;
+    @Column(length = 1000,nullable = false)
+    private String reviewText;
+
+    //De koppelingscode tussen boek en review
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id")
+    private Book book;
 }

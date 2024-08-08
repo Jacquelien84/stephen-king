@@ -8,10 +8,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class ReviewInputDto {
-
-    private long userId;
+    private Long id;
     private String name;
     private LocalDate reviewDate;
     private String reviewText;
-    private long amountOfLikes;
+
 }
