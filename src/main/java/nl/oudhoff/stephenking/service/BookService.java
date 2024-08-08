@@ -17,14 +17,15 @@ public class BookService {
 
     private final BookRepository bookRepo;
 
+
     public BookService(BookRepository bookRepo) {
         this.bookRepo = bookRepo;
     }
 
     public BookOutputDto createBook(BookInputDto bookInputDto) {
-        Book model = BookMapper.fromInputDtoToModel(bookInputDto);
-        bookRepo.save(model);
-        return BookMapper.fromModelToOutputDto(model);
+        Book book = BookMapper.fromInputDtoToModel(bookInputDto);
+        bookRepo.save(book);
+        return BookMapper.fromModelToOutputDto(book);
     }
 
     public BookOutputDto updateBook(long id, BookInputDto bookInputDto) {
@@ -51,10 +52,10 @@ public class BookService {
     }
 
     public List<BookOutputDto> getAllBooks() {
-        List<Book> books = bookRepo.findAll();
+        List<Book> allBooks = bookRepo.findAll();
         List<BookOutputDto> booksOutputDtoList = new ArrayList<>();
 
-        for (Book book : books) {
+        for (Book book : allBooks) {
             booksOutputDtoList.add(BookMapper.fromModelToOutputDto(book));
         }
         return booksOutputDtoList;

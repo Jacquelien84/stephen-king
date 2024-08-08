@@ -3,59 +3,47 @@ package nl.oudhoff.stephenking.controller;
 import jakarta.validation.Valid;
 import nl.oudhoff.stephenking.dto.input.ReviewInputDto;
 import nl.oudhoff.stephenking.dto.output.ReviewOutputDto;
+import nl.oudhoff.stephenking.model.Review;
+import nl.oudhoff.stephenking.service.BookService;
 import nl.oudhoff.stephenking.service.ReviewService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/reviews")
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final BookService bookService;
 
-    public ReviewController(ReviewService reviewService) {
+    public ReviewController(ReviewService reviewService, BookService bookService) {
         this.reviewService = reviewService;
+        this.bookService = bookService;
     }
 
     @PostMapping
-    public ResponseEntity<?> createReview(@Valid @RequestBody ReviewInputDto reviewInputDto, BindingResult br) {
-        try {
-            if (br.hasFieldErrors()) {
-                StringBuilder sb = new StringBuilder();
-                for (FieldError fe : br.getFieldErrors()) {
-                    sb.append(fe.getField());
-                    sb.append(" : ");
-                    sb.append(fe.getDefaultMessage());
-                    sb.append("\n");
-                }
-                return ResponseEntity.badRequest().body(sb.toString());
-            }
-        } catch (Exception e) {
-            return ResponseEntity.unprocessableEntity().body("Creation failed");
-        }
-        ReviewOutputDto reviewOutputDto = reviewService.createReview(reviewInputDto);
-        URI uri = URI.create(ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/" + reviewOutputDto.getUserId()).toUriString());
-
-        return ResponseEntity.created(uri).body(reviewOutputDto);
+    public ResponseEntity<?> createReview(@Valid @RequestBody ReviewInputDto reviewInputDto) {
+        ReviewOutputDto createReview = reviewService.createReview(reviewInputDto);
+        URI uri = URI.create(
+                ServletUriComponentsBuilder
+                        .fromCurrentRequest()
+                        .path("/" + reviewInputDto.getId()).toUriString());
+        return ResponseEntity.ok().body(createReview);
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<ReviewOutputDto> updateReview(@RequestBody ReviewInputDto reviewInputDto, @PathVariable String userId) {
-        ReviewOutputDto updateReview = reviewService.updateReview(Long.parseLong(userId), reviewInputDto);
-        return ResponseEntity.ok().body(updateReview);
+    @PutMapping("/{id}")
+    public ResponseEntity<ReviewOutputDto> updateReview(@RequestBody ReviewInputDto reviewInputDto, @PathVariable long id) {
+        return ResponseEntity.ok(reviewService.updateReview(id, reviewInputDto));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ReviewOutputDto> getReviewByUserId(@PathVariable long userId) {
-        return ResponseEntity.ok(reviewService.getReviewByUserId(userId));
+    @GetMapping("/{id}")
+    public ResponseEntity<ReviewOutputDto> getReviewById(@PathVariable long id) {
+        return ResponseEntity.ok(reviewService.getReviewById(id));
     }
 
     @GetMapping("/name")
@@ -68,8 +56,15 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getAllReviews());
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<String> deleteReviewByUserId(@PathVariable long userId) {
-        return ResponseEntity.ok(reviewService.deleteReviewByUserId(userId));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteReviewById(@PathVariable long id) {
+        return ResponseEntity.ok(reviewService.deleteReviewById(id));
+    }
+
+    @PutMapping("/{reviewId}/books/{bookId}")
+    public ResponseEntity<String> addReviewToBook(@PathVariable long reviewId, @PathVariable long bookId) {
+        reviewService.addReviewToBook(reviewId, bookId);
+        // builder pattern
+        return ResponseEntity.ok().build();
     }
 }

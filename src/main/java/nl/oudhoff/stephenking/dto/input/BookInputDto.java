@@ -1,5 +1,6 @@
 package nl.oudhoff.stephenking.dto.input;
 
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,12 +8,13 @@ import lombok.Setter;
 @Setter
 public class BookInputDto {
 
-    public long id;
-    public String title;
-    public String author;
-    public String originalTitle;
-    public long released;
-    public String movieAdaptation;
-    public String description;
+    private Long id;
+    @NotEmpty
+    private String title;
+    private String author;
+    private String originalTitle;
+    private Long released;
+    private String movieAdaptation;
+    private String description;
 
 }

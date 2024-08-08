@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Getter
 @Setter
@@ -27,6 +28,7 @@ public class Book {
     @Column(length = 5000, nullable = false)
     private String description;
 
-    @ManyToMany
-    private Set<Review> reviews = new HashSet<>();
-}
+    //De koppelingscode tussen boek en review
+    @OneToMany(mappedBy = "book")
+    private List<Review> listOfReviews = new ArrayList<>();
+    }
